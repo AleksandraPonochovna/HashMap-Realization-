@@ -17,23 +17,13 @@ public class MyHashMap<K, V> implements HashMap<K, V> {
             nodes = new Node[DEFAULT_CAPACITY];
         }
         int index = indexFor(key, nodes.length);
-        while (countOfElem >= nodes.length * LOAD_FACTOR) {
+        if (countOfElem >= nodes.length * LOAD_FACTOR) {
             increase();
         }
         Node<K, V> currentNode = nodes[index];
         Node<K, V> newNode = new Node(key, value);
-        if (Objects.isNull(currentNode) || index == 0) {
+        if (Objects.isNull(currentNode)) {
             nodes[index] = newNode;
-            countOfElem++;
-        } else if (currentNode.hasNext()) {
-            while (currentNode.hasNext()) {
-                if (currentNode.getKey().equals(key)) {
-                    currentNode.setValue(value);
-                } else {
-                    currentNode = currentNode.next;
-                }
-            }
-            nodes[index] = new Node(null, currentNode.getKey(), currentNode.getValue());
             countOfElem++;
         } else {
             if (Objects.isNull(key) && Objects.nonNull(value) || currentNode.getKey().equals(key)) {
@@ -42,16 +32,27 @@ public class MyHashMap<K, V> implements HashMap<K, V> {
             } else {
                 throw new NoSuchElementException("The key " + key + " is not found.");
             }
+            if (currentNode.hasNext()) {
+                while (currentNode.hasNext()) {
+                    if (currentNode.getKey().equals(key)) {
+                        currentNode.setValue(value);
+                    } else {
+                        currentNode = currentNode.getNext();
+                    }
+                }
+                nodes[index] = new Node(null, currentNode.getKey(), currentNode.getValue());
+                countOfElem++;
+            }
         }
     }
 
     @Override
     public V get(K key) {
-        for (int i = 0; i < nodes.length; i++) {
-            if (Objects.nonNull(nodes[i])) {
-                if (Objects.nonNull(key) && Objects.nonNull(nodes[i].getKey()) && nodes[i].getKey().equals(key) ||
-                        Objects.isNull(key) && Objects.isNull(nodes[i].getKey())) {
-                    return nodes[i].getValue();
+        for (Node<K, V> node : nodes) {
+            if (Objects.nonNull(node)) {
+                if (Objects.nonNull(key) && Objects.nonNull(node.getKey()) && node.getKey().equals(key) ||
+                        Objects.isNull(key) && Objects.isNull(node.getKey())) {
+                    return node.getValue();
                 }
             }
         }
@@ -69,19 +70,19 @@ public class MyHashMap<K, V> implements HashMap<K, V> {
                     newNode[index] = nodes[i];
                 } else {
                     K newKey = newNode[index].getKey();
-                    while (Objects.nonNull(nodes[i].next)) {
+                    while (Objects.nonNull(nodes[i].getNext())) {
                         if (Objects.isNull(newNode[index])) {
                             newNode[index] = nodes[i];
-                            nodes[i] = nodes[i].next;
+                            nodes[i] = nodes[i].getNext();
                         } else {
                             boolean hasNext = newNode[index].hasNext();
                             while (hasNext) {
-                                K nextKey = newNode[index].next.getKey();
+                                K nextKey = newNode[index].getNext().getKey();
                                 if (newKey.equals(nextKey)) {
-                                    newNode[index].next.setValue(newNode[index].value);
+                                    newNode[index].getNext().setValue(newNode[index].getValue());
                                     hasNext = false;
                                 } else {
-                                    newNode[index] = newNode[index].next;
+                                    newNode[index] = newNode[index].getNext();
                                 }
                             }
                             newNode[index] = new Node(null, nodes[i].getKey(), nodes[i].getValue());
@@ -96,11 +97,6 @@ public class MyHashMap<K, V> implements HashMap<K, V> {
 
     private int newCapacity() {
         return nodes.length * 2;
-    }
-
-    @Override
-    public void clear() {
-
     }
 
     @Override
@@ -122,9 +118,9 @@ public class MyHashMap<K, V> implements HashMap<K, V> {
     }
 
     private static class Node<K, V> {
-        Node<K, V> next;
-        K key;
-        V value;
+        private Node<K, V> next;
+        private K key;
+        private V value;
 
         public Node(K key, V value) {
             this.key = key;
@@ -152,6 +148,9 @@ public class MyHashMap<K, V> implements HashMap<K, V> {
         public boolean hasNext() {
             return next != null;
         }
+
+        public Node<K, V> getNext() {
+            return next;
+        }
     }
 }
-

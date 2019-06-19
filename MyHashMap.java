@@ -83,16 +83,17 @@ public class MyHashMap<K, V> implements HashMap<K, V> {
                             nodes[i] = nodes[i].getNext();
                         } else {
                             boolean hasNext = newNode[index].hasNext();
+                            Node<K, V> temp = newNode[index].getNext();
                             while (hasNext) {
                                 K nextKey = newNode[index].getNext().getKey();
                                 if (newKey.equals(nextKey)) {
                                     newNode[index].getNext().setValue(newNode[index].getValue());
                                     hasNext = false;
                                 } else {
-                                    newNode[index] = newNode[index].getNext();
+                                    temp = temp.getNext();
                                 }
                             }
-                            newNode[index] = new Node(null, nodes[i].getKey(), nodes[i].getValue());
+                            temp = new Node(null, nodes[i].getKey(), nodes[i].getValue());
                         }
                         countOfElem++;
                     }
@@ -101,7 +102,7 @@ public class MyHashMap<K, V> implements HashMap<K, V> {
         }
         nodes = Arrays.copyOf(newNode, newCapacity());
     }
-
+    
     private int newCapacity() {
         return nodes.length * 2;
     }

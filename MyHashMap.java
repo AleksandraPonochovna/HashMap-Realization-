@@ -46,12 +46,19 @@ public class MyHashMap<K, V> implements HashMap<K, V> {
         }
     }
 
-    @Override
+   @Override
     public V get(K key) {
         for (Node<K, V> node : nodes) {
             if (Objects.nonNull(node)) {
-                if (Objects.nonNull(key) && Objects.nonNull(node.getKey()) && node.getKey().equals(key) ||
-                        Objects.isNull(key) && Objects.isNull(node.getKey())) {
+                while (node.hasNext()) {
+                    if (node.getKey().equals(key)) {
+                        return node.getValue();
+                    } else {
+                        node = node.getNext();
+                    }
+                }
+                if (Objects.nonNull(key) && Objects.nonNull(node.getKey()) && node.getKey().equals(key)
+                        && !node.hasNext() || Objects.isNull(key) && Objects.isNull(node.getKey()) && !node.hasNext()) {
                     return node.getValue();
                 }
             }
